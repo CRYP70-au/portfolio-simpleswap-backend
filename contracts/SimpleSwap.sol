@@ -6,25 +6,26 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+import "hardhat/console.sol";
 
 contract SimpleSwap is ERC20 {
     using SafeMath for uint256;
 
-    ERC20 tokenA;
-    ERC20 tokenB;
+    ERC20 public tokenA;
+    ERC20 public tokenB;
 
-    uint256 tokenAPrice;
-    uint256 tokenBPrice;
+    uint256 public tokenAPrice;
+    uint256 public tokenBPrice;
 
-    uint256 tokenABalance;
-    uint256 tokenBBalance;
+    uint256 public tokenABalance;
+    uint256 public tokenBBalance;
 
     struct LPUserBalances {
         uint256 balanceA;
         uint256 balanceB;
     }
 
-    mapping(address => LPUserBalances) lpBalances;
+    mapping(address => LPUserBalances) public lpBalances;
 
     uint256 entered = 0;
     modifier nonReentrant() {
@@ -48,8 +49,13 @@ contract SimpleSwap is ERC20 {
         return (tokenBAmount * (tokenAPrice)) / 10 ** tokenA.decimals();
     }
 
-    function getTokenBPrice(uint256 tokenAAmount) view public returns(uint256){
+    function getTokenBPrice(uint256 tokenAAmount) view public returns(uint256) {
         return (tokenAAmount * (tokenBPrice)) / 10 ** tokenB.decimals();
+    }
+
+    function getLPBalance() view external returns(uint256, uint256) {
+        LPUserBalances memory lpBalance = lpBalances[msg.sender];
+        return (lpBalance.balanceA, lpBalance.balanceB);
     }
 
     function addLiquidity(uint256 amountA, uint256 amountB, uint256 deadline) external nonReentrant {
@@ -94,7 +100,7 @@ contract SimpleSwap is ERC20 {
             tokenAPrice = (tokenABalance * (10 ** tokenA.decimals())) / (tokenBBalance);
         }
         else{
-            tokenAPrice = tokenBBalance; // if balance == 0, the price is the balance amount of the other token
+            tokenAPrice = tokenBBalance; // if balance == 0, the price is the balance amount of the other token perserving x * y = k
         }
         if(tokenBBalance != 0){
             tokenBPrice = (tokenBBalance * (10 ** tokenB.decimals())) / (tokenABalance);
@@ -115,19 +121,17 @@ contract SimpleSwap is ERC20 {
     function swap(
         uint256 tokenAIn, 
         uint256 tokenBIn,  
-        uint256 minTokenAOut,
-         uint256 minTokenBOut
+        uint256 minTokenBOut,
+        uint256 minTokenAOut
     ) external nonReentrant {
         require(tokenA.balanceOf(address(this)) > 0, "A: Insufficient liquidity!");
         require(tokenB.balanceOf(address(this)) > 0, "B: Insufficient liquidity!");
         require(tokenAIn > 0 || tokenBIn > 0, "TA || TB !> 0");
 
-        // Handle token a swap first - swap a for b
         if(tokenAIn > 0 ){
             // Slippage protection
             uint256 amountTokenBOut = getTokenBPrice(tokenAIn);
             require(amountTokenBOut >= minTokenBOut , "A: Too much slippage!");
-
             // Update balances
             tokenABalance += tokenAIn;
             tokenBBalance -= amountTokenBOut;
