@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("hardhat-deploy");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -13,6 +14,11 @@ module.exports = {
     ]
   },
   networks: {
-
+    hardhat: {
+      chainId: 31337
+    },
+    localhost: {
+      chainId: 31337
+    }
   }
 };

@@ -58,8 +58,16 @@ contract SimpleSwap is ERC20 {
         return (lpBalance.balanceA, lpBalance.balanceB);
     }
 
+    function getTokenABalance() view external returns(uint256) {
+        return tokenABalance;
+    }    
+
+    function getTokenBBalance() view external returns(uint256) {
+        return tokenBBalance;
+    }
+
     function addLiquidity(uint256 amountA, uint256 amountB, uint256 deadline) external nonReentrant {
-        
+        // TODO - maintain x*y=k
         require(block.timestamp < deadline, "Deadline reached!");
 
         tokenA.transferFrom(msg.sender, address(this), amountA);
@@ -71,8 +79,17 @@ contract SimpleSwap is ERC20 {
         tokenAPrice = (tokenABalance * (10 ** tokenA.decimals())) / (tokenBBalance);
         tokenBPrice = (tokenBBalance * (10 ** tokenB.decimals())) / (tokenABalance);
 
-        LPUserBalances memory userBal = LPUserBalances(amountA, amountB);
-        lpBalances[msg.sender] = userBal; 
+        
+        if(lpBalances[msg.sender].balanceA == 0 && lpBalances[msg.sender].balanceB == 0){
+            LPUserBalances memory userBal = LPUserBalances(amountA, amountB);
+            lpBalances[msg.sender] = userBal; 
+        } 
+        else {
+            LPUserBalances memory userBal = lpBalances[msg.sender];
+            userBal.balanceA += amountA;
+            userBal.balanceB += amountB;
+            lpBalances[msg.sender] = userBal;
+        }
 
         uint256 lpToMint = amountA+ amountB;
         _mint(msg.sender, lpToMint);
@@ -107,6 +124,10 @@ contract SimpleSwap is ERC20 {
         }
         else {
             tokenBPrice = tokenABalance;
+        }
+
+        if(userBal.balanceA == 0 && userBal.balanceB == 0){
+            delete lpBalances[msg.sender];
         }
 
         _burn(msg.sender, lpAmount);
@@ -164,6 +185,6 @@ contract SimpleSwap is ERC20 {
         emit SimpleSwapped(msg.sender, tokenAIn, tokenBIn);
 
     }
-    
+
 
 }
