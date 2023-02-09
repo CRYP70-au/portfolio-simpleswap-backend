@@ -44,14 +44,16 @@ contract SimpleSwap is ERC20 {
         tokenB = ERC20(_tokenB);
     }
 
-    // Param is the amount of token b to supply
-    function getTokenAPrice(uint256 tokenBAmount) view public returns(uint256) {
+    // How much of token b we get out for supplying token a
+    function getTokenAPrice(uint256 tokenAAmount) view public returns(uint256) {
+        return (tokenAAmount * (tokenBPrice)) / 10 ** tokenB.decimals();
+    }
+
+    // How much of token a we get out for supplying token b
+    function getTokenBPrice(uint256 tokenBAmount) view public returns(uint256) {
         return (tokenBAmount * (tokenAPrice)) / 10 ** tokenA.decimals();
     }
 
-    function getTokenBPrice(uint256 tokenAAmount) view public returns(uint256) {
-        return (tokenAAmount * (tokenBPrice)) / 10 ** tokenB.decimals();
-    }
 
     function getLPBalance() view external returns(uint256, uint256) {
         LPUserBalances memory lpBalance = lpBalances[msg.sender];
@@ -151,7 +153,7 @@ contract SimpleSwap is ERC20 {
 
         if(tokenAIn > 0 ){
             // Slippage protection
-            uint256 amountTokenBOut = getTokenBPrice(tokenAIn);
+            uint256 amountTokenBOut = getTokenAPrice(tokenAIn);
             require(amountTokenBOut >= minTokenBOut , "A: Too much slippage!");
             // Update balances
             tokenABalance += tokenAIn;
@@ -167,7 +169,7 @@ contract SimpleSwap is ERC20 {
         }
         if(tokenBIn > 0 ){
             // Slippage protection
-            uint256 amountTokenAOut = getTokenAPrice(tokenBIn);
+            uint256 amountTokenAOut = getTokenBPrice(tokenBIn);
             require(amountTokenAOut >= minTokenAOut , "B: Too much slippage!");
 
             // Update balances
@@ -185,6 +187,5 @@ contract SimpleSwap is ERC20 {
         emit SimpleSwapped(msg.sender, tokenAIn, tokenBIn);
 
     }
-
 
 }
