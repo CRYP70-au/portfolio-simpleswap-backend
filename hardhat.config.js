@@ -1,7 +1,11 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-deploy");
+require('dotenv').config()
 
 /** @type import('hardhat/config').HardhatUserConfig */
+
+const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL
+const GOERLI_DEV_PRIVATE_KEY = process.env.GOERLI_DEV_PRIVATE_KEY
 module.exports = {
   solidity: {
     compilers: [
@@ -21,9 +25,11 @@ module.exports = {
       chainId: 31337
     },
     goerli: {
-      chainId: {
-        
-      }
+      chainId: 5,
+      url: GOERLI_RPC_URL,
+      accounts: [
+        GOERLI_DEV_PRIVATE_KEY
+      ]
     }
   }
 };
