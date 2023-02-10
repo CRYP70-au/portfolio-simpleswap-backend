@@ -8,7 +8,7 @@ contract TestToken is ERC20 {
     address owner;
 
     uint256 mintThreshold = 12 hours;
-    mapping(address => uint256) usersLastMintTime;
+    mapping(address => uint256) public usersLastMintTime;
 
     event Drip(address,uint256);
 
@@ -25,6 +25,9 @@ contract TestToken is ERC20 {
         _mint(msg.sender, initialSupply);
     }
 
+    function setThreshold(uint256 _newThreshold) external onlyOwner{
+        mintThreshold = _newThreshold;
+    } 
 
     function drip() external {
         uint256 lastMintTime = usersLastMintTime[msg.sender];

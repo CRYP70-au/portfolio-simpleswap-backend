@@ -19,6 +19,11 @@ module.exports = {
     },
     localhost: {
       chainId: 31337
+    },
+    goerli: {
+      chainId: {
+        
+      }
     }
   }
 };

@@ -3,9 +3,9 @@ const fs = require("fs");
 const {ethers, network} = require("hardhat");
 require('dotenv').config();
 
-const FRONT_END_ADDRESSES_FILE= "../portfolio-simpleswap-frontend/constants/contractAddresses.json"
-const FRONT_END_ABI_FILE_SWAP = "../portfolio-simpleswap-frontend/constants/swap-abi.json"
-const FRONT_END_ABI_FILE_TOKEN = "../portfolio-simpleswap-frontend/constants/token-abi.json"
+const FRONT_END_ADDRESSES_FILE= "../portfolio-frontend/constants/simpleswap/contractAddresses.json"
+const FRONT_END_ABI_FILE_SWAP = "../portfolio-frontend/constants/simpleswap/swap-abi.json"
+const FRONT_END_ABI_FILE_TOKEN = "../portfolio-frontend/constants/simpleswap/token-abi.json"
 
 async function logBalances(swap, tokenA, tokenB, user) {
 
